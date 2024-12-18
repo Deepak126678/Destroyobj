@@ -1,13 +1,40 @@
-const canvas = document.getElementById("myCanvas");
+/**
+  `canvas` For selecting the html canvas element
+ */
+const canvas = document.getElementById("myCanvas"); 
+/**
+ *  `ctx` For geting the context of the canvas
+ */
 const ctx = canvas.getContext("2d");
+/**
+ *  `button` For selecting the button html element with Id "createCircle"
+ */
 const button = document.getElementById("createCircle");
+/**
+ * `fileInput` For selecting the input type="file"  html element
+ */
 const fileInput = document.getElementById("fileInput");
+/**
+ * `destroyButton` To select the Destroy button in html
+ */
 const destroyButton = document.getElementById("DestroyObject");
-
-let backgroundImage = null; // To store uploaded image
-let selectedCircle = null; // Circle currently selected for destruction or dragging
-let isDragging = false; // Flag to track if the circle is being dragged
-let offsetX, offsetY; // Offsets for dragging
+/**
+ * `background` Variable for storing background image
+ */
+let backgroundImage = null; 
+/**
+ * `selectedCircle` Circle currently selected for destruction or dragging
+ */
+let selectedCircle = null; 
+/**
+ * `isDragging` Variable to track if the circle is being dragged
+ */
+let isDragging = false; 
+/**
+ * `offsetX` ForDragging the obj in x axis
+ * `offsetY` ForDragging the obj in y axis
+ */
+let offsetX, offsetY;
 
 /**
  * Circle Class with properties and methods
@@ -24,6 +51,9 @@ class Circle {
     this.orbitSpeed = 0.02;
   }
 
+  /**
+   * @draw Function for drawing the circle  with circle parameter
+   */
   draw() {
     const gradient = ctx.createRadialGradient(
       this.x - this.radius / 3,
@@ -45,7 +75,10 @@ class Circle {
 
     this.updateMoonPosition();
   }
-
+  /**
+   * @updateMoonPosition  Function for revolving the moon around the sun  by geting theangle of revolution of x axis and 
+   * y axis
+   */
   updateMoonPosition() {
     this.angle += this.orbitSpeed;
     const moonX = this.x + Math.cos(this.angle) * this.orbitRadius;
@@ -57,42 +90,57 @@ class Circle {
     ctx.fill();
     ctx.closePath();
   }
-
+  /**
+   * @containsPoint Cheaks wheather the mouse is in circle
+   * @param {Number} mouseX 
+   * @param {Number} mouseY  
+   * @returns {Boolean} we are returning the bool if the 
+   */
   containsPoint(mouseX, mouseY) {
     return Math.sqrt((this.x - mouseX) ** 2 + (this.y - mouseY) ** 2) <= this.radius;
   }
 }
 
-/**
- * CircleFunction class to manage circles
- */
-class CircleFunction {
-  constructor() {
-    this.circle_set = new Set();
-  }
 
-  addCircle(circle) {
-    this.circle_set.add(circle);
-  }
+ 
 
-  drawCircles() {
+    /**
+     * @circle_set The circle set for storing circle Objects
+     */
+    circle_set = new Set();
+  
+  /**
+   * 
+   * @param {Circle} circle  Function for adding new circle in the circle_set
+   */
+  function addCircle(circle) {
+    circle_set.add(circle);
+  }
+  /**
+   * @drawCircles Function For Drawing every object of the set
+   */
+  function drawCircles() {
     this.circle_set.forEach((circle) => circle.draw());
   }
-
-  getCircleAtPoint(mouseX, mouseY) {
+  /**
+   * 
+   * @param {Number} mouseX :Position of the mouse in x axis
+   * @param {Number} mouseY Position of the mouse in Y axis
+   * @returns 
+   */
+  function getCircleAtPoint(mouseX, mouseY) {
     for (const circle of this.circle_set) {
       if (circle.containsPoint(mouseX, mouseY)) return circle;
     }
     return null;
   }
-
-  destroyCircle(circle) {
+  /**
+   * @destroyCircle Function to destroy the object
+   * @param {Circle} circle 
+   */
+   function destroyCircle(circle){
     this.circle_set.delete(circle);
   }
-}
-
-const circleFunObj = new CircleFunction();
-
 /**
  * File Input: Upload and load background image
  */
@@ -105,9 +153,7 @@ fileInput.addEventListener("change", (event) => {
   img.onload = () => (backgroundImage = img);
 });
 
-/**
- * Button: Add Random Circle
- */
+
 button.addEventListener("click", () => {
   const x = Math.random() * canvas.width;
   const y = Math.random() * canvas.height;
@@ -115,17 +161,17 @@ button.addEventListener("click", () => {
   const color = `hsl(${Math.random() * 360}, 70%, 50%)`;
 
   const newCircle = new Circle(x, y, radius, color);
-  circleFunObj.addCircle(newCircle);
+  addCircle(newCircle);
 });
 
 /**
- * Mouse Down: Select a circle or start dragging
+ *EventListner for mousedown Function
  */
 canvas.addEventListener("mousedown", (e) => {
   const mouseX = e.offsetX;
   const mouseY = e.offsetY;
 
-  const circle = circleFunObj.getCircleAtPoint(mouseX, mouseY);
+  const circle = getCircleAtPoint(mouseX, mouseY);
 
   if (circle) {
     // Select the circle for dragging or destruction
@@ -165,10 +211,10 @@ destroyButton.addEventListener("click", () => {
   const circleToDestroy = selectedCircle; // Capture the currently selected circle
   selectedCircle = null; // Clear the selection
 
-  //alert("Circle will be destroyed in 5 seconds...");
+  
   setTimeout(() => {
-    circleFunObj.destroyCircle(circleToDestroy);
-   // alert("Circle destroyed!");
+    destroyCircle(circleToDestroy);
+  
   }, 7000);
 });
 
@@ -196,12 +242,10 @@ function animate() {
   }
 
   // Draw all circles
-  circleFunObj.drawCircles();
+  drawCircles();
 
   requestAnimationFrame(animate);
 }
 
 // Start animation
-animate();
-
-
+animate();;
